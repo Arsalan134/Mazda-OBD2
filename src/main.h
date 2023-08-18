@@ -2,10 +2,8 @@
 
 #include <CAN.h>
 #include <FastLED.h>
-#include <LiquidCrystal_I2C.h>
 #include <OBD2.h>
 #include <Wire.h>
-#include <arduino-timer.h>
 
 // Pins
 #define LED_PIN 3
@@ -30,7 +28,6 @@
 #define TURN_OFF_RPM 100
 
 // Objects
-LiquidCrystal_I2C lcd(0x27, 20, 4);
 CRGB leds[NUM_LEDS];
 
 // Changing Variables
@@ -56,8 +53,6 @@ int currentBrightnessIndex = 0;
 byte Heart[8] = {0b00000, 0b01010, 0b11111, 0b11111, 0b11111, 0b01110, 0b00100, 0b00000};
 
 byte Degree[8] = {0b01100, 0b10010, 0b10010, 0b01100, 0b00000, 0b00000, 0b00000, 0b00000};
-
-auto timer = timer_create_default();
 
 enum StateOfDevices { offAll, onAll };
 
