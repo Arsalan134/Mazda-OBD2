@@ -19,10 +19,9 @@ void setup() {
   Serial.println("CAN OBD-II engine RPM");
 
   // start the CAN bus at 500 kbps
-  if (!CAN.begin(500E3)) {
+  while (!CAN.begin(500E3)) {
     Serial.println("Starting CAN failed!");
-    while (1)
-      ;
+    delay(1000);
   }
 
   // add filter to only receive the CAN bus ID's we care about
