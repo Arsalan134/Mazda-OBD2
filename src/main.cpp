@@ -1,160 +1,59 @@
 #include "main.h"
+// Copyright (c) Sandeep Mistry. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license
+// information.
+//
+//
+// This examples queries the engine RPM (OBD-II PID 0x0c) once a seconds and
+// prints the value to the serial monitor
+//
+
+// Most cars support 11-bit adddress, others (like Honda),
+// require 29-bit (extended) addressing, set the next line
+// to true to use extended addressing
+const bool useStandardAddressing = true;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
-  while (!Serial)
-    ;
+  Serial.println("CAN OBD-II engine RPM");
 
-  Serial.println(F("OBD2 Supported PIDs"));
-
-  while (true) {
-    Serial.print(F("Attempting to connect to OBD2 CAN bus ... "));
-
-    if (!OBD2.begin()) {
-      Serial.println(F("failed!"));
-
-      delay(1000);
-    } else {
-      Serial.println(F("success"));
-      break;
-    }
+  // start the CAN bus at 500 kbps
+  if (!CAN.begin(500E3)) {
+    Serial.println("Starting CAN failed!");
+    while (1)
+      ;
   }
 
-  Serial.println();
-
-  // loop through PIDs 0 to 95, reading and printing the names of the supported PIDs
-  for (int pid = 0; pid < 96; pid++) {
-    if (OBD2.pidSupported(pid)) {
-      Serial.println(OBD2.pidName(pid));
-    }
+  // add filter to only receive the CAN bus ID's we care about
+  if (useStandardAddressing) {
+    CAN.filter(0x7e8);
+  } else {
+    CAN.filterExtended(0x18daf110);
   }
-
-  while (!OBD2.begin())
-    delay(200);
-
-  FastLED.addLeds<WS2813, LED_PIN, RGB>(leds, NUM_LEDS, 0);
-  FastLED.setBrightness(LED_MAX_BRIGHTNESS);
-
-  //   Serial.println("Setup is DONE !!!");
 }
 
 void loop() {
-  ledsLoop();
-
-  int rpm = OBD2.pidRead(ENGINE_RPM);
-
-  // Check Engine State
-  if (rpm < TURN_OFF_RPM) {
-    if (stateOfDevices != offAll) {
-      // Serial.println("Engine is just turned off and display and led are on");
-      delay(1000);
-      switchState(offAll);
-      // introPresented = false;
-      OBD2.end();  // ================================
-                   // Check what happens if end connection and read rpm
-    } else {
-      // Delay programm if engine is off
-      // Serial.println("Engine is off and leds are off");
-      delay(1000);
-    }
-  } else if (rpm > TURN_OFF_RPM && stateOfDevices == offAll && !introPresented) {
-    // Serial.println("Engine is on");
-
-    // switchState(onAll);
-    // delay(1000);
-    // intro();
-    // introPresented = true;
-    // switchState(offAll);
-
-    // while (!OBD2.begin())
-    // delay(200);
+  if (useStandardAddressing) {
+    CAN.beginPacket(0x7df, 8);
+  } else {
+    CAN.beginExtendedPacket(0x18db33f1, 8);
   }
+  CAN.write(0x02);  // number of additional bytes
+  CAN.write(0x01);  // show current data
+  CAN.write(0x0c);  // engine RPM
+  CAN.endPacket();
+
+  // wait for response
+  while (CAN.parsePacket() == 0 || CAN.read() < 3 ||  // correct length
+         CAN.read() != 0x41 ||                        // correct mode
+         CAN.read() != 0x0c)
+    ;  // correct PID
+
+  float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
+
+  Serial.print("Engine RPM = ");
+  Serial.println(rpm);
+
+  delay(1000);
 }
-
-void ledsLoop() {
-  int rpm = OBD2.pidRead(ENGINE_RPM);
-
-  if (!isnan(rpm)) {
-    int level = map(rpm, RPM_MIN, RPM_MAX, 0, NUM_LEDS);
-    level = constrain(level, 0, NUM_LEDS);
-
-    fill_gradient_RGB(leds, NUM_LEDS, CRGB{255, 255, 0}, CRGB{255, 0, 0});
-
-    for (int i = level; i < NUM_LEDS; i++)
-      leds[i] = CRGB::Black;
-
-    // Blink
-    if (rpm >= BLINK_RPM) {
-      if (!isBlinkingRPMLimitPassed) {
-        isBlinkingRPMLimitPassed = true;
-        ledBlinkStartMillis = millis();
-      }
-
-      if (millis() - ledBlinkStartMillis >= BLINK_DURATION) {
-        colorsAreTurnedOn = !colorsAreTurnedOn;
-        ledBlinkStartMillis = millis();
-      }
-
-      if (!colorsAreTurnedOn)
-        FastLED.clear();
-
-    } else {
-      isBlinkingRPMLimitPassed = false;
-    }
-
-    FastLED.show();
-  }
-}
-
-// void printDataToScreen() {
-//   lcd.home();
-
-//   switch (preset) {
-//     default:
-//       printValue("Injection: ", FUEL_RAIL_GAUGE_PRESSURE, 0, 0);
-//       printValue("Intake:       ", INTAKE_MANIFOLD_ABSOLUTE_PRESSURE, 0, 1);
-//       printTemp("Intake Temp:  ", AIR_INTAKE_TEMPERATURE, 0, 2);
-//       printTemp("Coolant Temp: ", ENGINE_COOLANT_TEMPERATURE, 0, 3);
-//       break;
-
-//     case 1:
-//       printTemp("Outside Temp: ", AMBIENT_AIR_TEMPERATURE, 0, 0);
-//       printTemp("Intake Temp:  ", AIR_INTAKE_TEMPERATURE, 0, 1);
-//       printTemp("Catalyst 1:   ", CATALYST_TEMPERATURE_BANK_1_SENSOR_1, 0, 2);
-//       printTemp("Catalyst 2:   ", CATALYST_TEMPERATURE_BANK_2_SENSOR_1, 0, 3);
-//       break;
-
-//     case 2:
-//       printValue("RPM:    ", ENGINE_RPM, 0, 0);
-//       printValue("Speed:  ", VEHICLE_SPEED, 0, 1);
-//       printValue("Load:   ", CALCULATED_ENGINE_LOAD, 0, 2);
-//       printValue("Fuel:   ", FUEL_TANK_LEVEL_INPUT, 0, 3);
-//       break;
-//   }
-// }
-
-// void printValue(String title, int pid, int column, int row) {
-//   float value = OBD2.pidRead(pid);
-//   String units = OBD2.pidUnits(pid);
-
-//   if (!isnan(value)) {
-//     lcd.setCursor(column, row);
-
-//     lcd.print(title);
-
-//     // Clear value spaces
-//     for (unsigned int i = 0; i < (20 - strlen(title.c_str())); i++)
-//       lcd.print(" ");
-
-//     lcd.setCursor(column + strlen(title.c_str()), row);
-
-//     if (roundf(value) == value)
-//       lcd.print(int(value));
-//     else
-//       lcd.print(value);
-
-//     lcd.print(" ");
-//     lcd.print(units);
-//   }
-// }
