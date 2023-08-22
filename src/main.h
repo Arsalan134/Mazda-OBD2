@@ -1,8 +1,9 @@
 #include <Arduino.h>
 
-#include <CAN.h>
+// #include <CAN.h>
 #include <FastLED.h>
 // #include <OBD2.h>
+#include <SPI.h>
 #include <Wire.h>
 
 // Pins
@@ -58,6 +59,8 @@ enum StateOfDevices { offAll, onAll };
 
 StateOfDevices stateOfDevices = offAll;
 
+void taskCanRecv();
+void taskDbg();
 void intro();
 void shortPressed();
 void doublePressed();
