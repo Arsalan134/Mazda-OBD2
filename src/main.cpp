@@ -12,7 +12,7 @@
 // Most cars support 11-bit adddress, others (like Honda),
 // require 29-bit (extended) addressing, set the next line
 // to true to use extended addressing
-const bool useStandardAddressing = true;
+const bool useStandardAddressing = false;
 
 void setup() {
   Serial.begin(9600);
