@@ -54,6 +54,4 @@ void loop() {
 
   Serial.print("Engine RPM = ");
   Serial.println(rpm);
-
-  delay(1000);
 }
