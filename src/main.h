@@ -1,8 +1,6 @@
 #include <Arduino.h>
 
-// #include <CAN.h>
 #include <FastLED.h>
-// #include <OBD2.h>
 #include <SPI.h>
 #include <Wire.h>
 
