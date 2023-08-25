@@ -7,7 +7,6 @@
 // This examples queries the engine RPM (OBD-II PID 0x0c) once a seconds and
 // prints the value to the serial monitor
 //
-#include <CAN.h>
 
 // Most cars support 11-bit adddress, others (like Honda),
 // require 29-bit (extended) addressing, set the next line
@@ -31,6 +30,10 @@ void setup() {
   } else {
     CAN.filterExtended(0x18daf110);
   }
+
+  // Setup LED library
+  FastLED.addLeds<WS2813, LED_PIN, RGB>(leds, NUM_LEDS, 0);
+  FastLED.setBrightness(LED_MAX_BRIGHTNESS / 2);
 }
 
 void loop() {
@@ -39,19 +42,80 @@ void loop() {
   } else {
     CAN.beginExtendedPacket(0x18db33f1, 8);
   }
+
   CAN.write(0x02);  // number of additional bytes
   CAN.write(0x01);  // show current data
   CAN.write(0x0c);  // engine RPM
   CAN.endPacket();
 
   // wait for response
-  while (CAN.parsePacket() == 0 || CAN.read() < 3 ||  // correct length
-         CAN.read() != 0x41 ||                        // correct mode
-         CAN.read() != 0x0c)
-    ;  // correct PID
+  while (!CAN.parsePacket()) {
+    int response = CAN.read();
 
-  float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
+    // correct length; correct mode;  correct PID
+    while (response < 3 || response != 0x41 || response != 0x0c)
+      ;
+  }
 
-  Serial.print("Engine RPM = ");
+  int rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
+
   Serial.println(rpm);
+
+  // Check Engine State
+  // if (rpm < TURN_OFF_RPM) {
+  //   // Serial.println("Engine is just turned off and display and led are on");
+
+  //   CAN.end();  // ================================
+  //               // Check what happens if end connection and read rpm
+  //   // Delay programm if engine is off
+  //   // Serial.println("Engine is off and leds are off");
+
+  //   delay(1000);
+
+  //   return;
+  // }
+
+  ledsLoop();
+}
+
+void ledsLoop() {
+  // Get rpm from OBD
+  int response = CAN.read();
+  int rpm = ((response * 256.0) + response) / 4.0;
+
+  // Cursor that shows current rpm value among leds
+  int level = map(rpm, RPM_MIN, RPM_MAX, 0, NUM_LEDS);
+  level = constrain(level, 0, NUM_LEDS);
+
+  // Prefill LED Strip with colors
+  fill_gradient_RGB(leds, NUM_LEDS, CRGB{255, 255, 0}, CRGB{255, 0, 0});
+
+  // Uncolor leds that are beyond the cursor
+  for (int i = level; i < NUM_LEDS; i++)
+    leds[i] = CRGB::Black;
+
+  // Blink part
+  if (rpm >= BLINK_RPM_THRESHOLD) {
+    if (!isBlinkingRPMLimitPassed) {
+      isBlinkingRPMLimitPassed = true;
+      lastTimeLEDsWereToggled = millis();
+    }
+
+    // Checking how long leds are on.
+    // If they are on or off too long, we will toggle them
+    if (millis() - lastTimeLEDsWereToggled >= BLINK_DURATION) {
+      colorsAreTurnedOn = !colorsAreTurnedOn;
+      lastTimeLEDsWereToggled = millis();
+    }
+
+    if (!colorsAreTurnedOn)
+      // Turn off led
+      FastLED.clear();
+
+  } else
+    // We are out of rpm blinking defined range limits
+    isBlinkingRPMLimitPassed = false;
+
+  // Send data to a led strip
+  FastLED.show();
 }
