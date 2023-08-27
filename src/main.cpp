@@ -49,17 +49,26 @@ void loop() {
   CAN.endPacket();
 
   // wait for response
-  while (!CAN.parsePacket()) {
-    int response = CAN.read();
+  while (CAN.parsePacket() == 0 || CAN.read() < 3 ||  // correct length
+         CAN.read() != 0x41 ||                        // correct mode
+         CAN.read() != 0x0c)
+    ;  // correct PID
 
-    // correct length; correct mode;  correct PID
-    while (response < 3 || response != 0x41 || response != 0x0c)
-      ;
-  }
+  float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
 
-  int rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
-
+  Serial.print("Engine RPM = ");
   Serial.println(rpm);
+
+  // wait for response
+  // while (!CAN.parsePacket()) {
+  //   int response = CAN.read();
+
+  //   // correct length; correct mode;  correct PID
+  //   while (response < 3 || response != 0x41 || response != 0x0c)
+  //     ;
+  // }
+
+  // int rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
 
   // Check Engine State
   // if (rpm < TURN_OFF_RPM) {
