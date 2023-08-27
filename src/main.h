@@ -2,8 +2,6 @@
 
 #include <CAN.h>
 #include <FastLED.h>
-#include <SPI.h>
-#include <Wire.h>
 
 // Comment next line and save to change the Environment
 #define isTesting
