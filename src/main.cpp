@@ -60,10 +60,10 @@ void loop() {
          CAN.read() != 0x0c)
     ;  // correct PID
 
-  float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
+  // float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
 
-  Serial.print("Engine RPM = ");
-  Serial.println(rpm);
+  // Serial.print("Engine RPM = ");
+  // Serial.println(rpm);
 
   // wait for response
   // while (!CAN.parsePacket()) {
