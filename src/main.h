@@ -15,7 +15,7 @@
 #define LED_MAX_BRIGHTNESS 150  // 0 - 255
 #define BLINK_DURATION 75       // milliseconds
 
-#define RPM_MIN 900               // Start rpm value
+#define RPM_MIN 500               // Start rpm value
 #define RPM_MAX 2000              // End rpm value
 #define BLINK_RPM_THRESHOLD 1500  // RPM threshold for blink to start
 
