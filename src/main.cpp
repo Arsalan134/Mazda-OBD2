@@ -38,7 +38,7 @@ void setup() {
   }
 
   // Setup LED library
-  FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, NUM_LEDS, 0);
+  FastLED.addLeds<WS2813, LED_PIN, RGB>(leds, NUM_LEDS, 0);
   FastLED.setBrightness(LED_MAX_BRIGHTNESS);
 }
 
