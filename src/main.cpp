@@ -24,6 +24,8 @@ void setup() {
     delay(500);
   }
 
+  Serial.println("Starting CAN SUCCESS!");
+
   // add filter to only receive the CAN bus ID's we care about
   if (useStandardAddressing) {
     CAN.filter(0x7e8);
@@ -89,8 +91,8 @@ void loop() {
 
 void ledsLoop() {
   // Get rpm from OBD
-  int response = CAN.read();
-  int rpm = ((response * 256.0) + response) / 4.0;
+
+  float rpm = ((CAN.read() * 256.0) + CAN.read()) / 4.0;
 
   // Cursor that shows current rpm value among leds
   int level = map(rpm, RPM_MIN, RPM_MAX, 0, NUM_LEDS);
@@ -104,26 +106,26 @@ void ledsLoop() {
     leds[i] = CRGB::Black;
 
   // Blink part
-  if (rpm >= BLINK_RPM_THRESHOLD) {
-    if (!isBlinkingRPMLimitPassed) {
-      isBlinkingRPMLimitPassed = true;
-      lastTimeLEDsWereToggled = millis();
-    }
+  // if (rpm >= BLINK_RPM_THRESHOLD) {
+  //   if (!isBlinkingRPMLimitPassed) {
+  //     isBlinkingRPMLimitPassed = true;
+  //     lastTimeLEDsWereToggled = millis();
+  //   }
 
-    // Checking how long leds are on.
-    // If they are on or off too long, we will toggle them
-    if (millis() - lastTimeLEDsWereToggled >= BLINK_DURATION) {
-      colorsAreTurnedOn = !colorsAreTurnedOn;
-      lastTimeLEDsWereToggled = millis();
-    }
+  //   // Checking how long leds are on.
+  //   // If they are on or off too long, we will toggle them
+  //   if (millis() - lastTimeLEDsWereToggled >= BLINK_DURATION) {
+  //     colorsAreTurnedOn = !colorsAreTurnedOn;
+  //     lastTimeLEDsWereToggled = millis();
+  //   }
 
-    if (!colorsAreTurnedOn)
-      // Turn off led
-      FastLED.clear();
+  //   if (!colorsAreTurnedOn)
+  //     // Turn off led
+  //     FastLED.clear();
 
-  } else
-    // We are out of rpm blinking defined range limits
-    isBlinkingRPMLimitPassed = false;
+  // } else
+  //   // We are out of rpm blinking defined range limits
+  //   isBlinkingRPMLimitPassed = false;
 
   // Send data to a led strip
   FastLED.show();
