@@ -102,7 +102,7 @@ void ledsLoop() {
   int level = map(rpm, RPM_MIN, RPM_MAX, 0, NUM_LEDS);
   level = constrain(level, 0, NUM_LEDS);
 
-  Serial.print("Current LED ");
+  Serial.print("Current LED: ");
   Serial.println(level);
 
   // Prefill LED Strip with colors
