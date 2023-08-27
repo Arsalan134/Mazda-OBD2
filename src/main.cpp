@@ -14,7 +14,11 @@
 const bool useStandardAddressing = true;
 
 void setup() {
+  delay(1000);
+
   Serial.begin(9600);
+
+  delay(1000);
 
   Serial.println("CAN OBD-II engine RPM");
 
@@ -35,7 +39,7 @@ void setup() {
 
   // Setup LED library
   FastLED.addLeds<WS2813, LED_PIN, RGB>(leds, NUM_LEDS, 0);
-  FastLED.setBrightness(LED_MAX_BRIGHTNESS / 2);
+  FastLED.setBrightness(LED_MAX_BRIGHTNESS);
 }
 
 void loop() {
