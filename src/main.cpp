@@ -16,7 +16,7 @@ const bool useStandardAddressing = true;
 void setup() {
   delay(1000);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   delay(1000);
 
@@ -106,7 +106,7 @@ void ledsLoop() {
   Serial.println(level);
 
   // Prefill LED Strip with colors
-  fill_gradient_RGB(leds, NUM_LEDS, CRGB{255, 255, 0}, CRGB{255, 0, 0});
+  fill_gradient(leds, NUM_LEDS, CRGB{255, 255, 0}, CRGB{255, 0, 0});
 
   // Uncolor leds that are beyond the cursor
   for (int i = level; i < NUM_LEDS; i++)
