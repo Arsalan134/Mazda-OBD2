@@ -50,7 +50,7 @@ Ever wanted to see your engine's RPM in real-time with a cool LED strip? This pr
 
 ## 📹 Demo
 
-https://github.com/Arsalan134/Mazda-OBD2/blob/main/rpm.mp4
+https://github.com/Arsalan134/Mazda-OBD2/blob/main/🏎%EF%B8%8F%20rpm%20demo.mp4
 
 *Watch your engine come to life with real-time RPM visualization!*
 
