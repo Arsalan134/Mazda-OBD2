@@ -4,7 +4,6 @@
 
 ![Arduino](https://img.shields.io/badge/Arduino-00979D?style=for-the-badge&logo=arduino&logoColor=white)
 ![C++](https://img.shields.io/badge/C++-00599C?style=for-the-badge&logo=c%2B%2B&logoColor=white)
-![BMW](https://img.shields.io/badge/BMW-0066CC?style=for-the-badge&logo=bmw&logoColor=white)
 ![Mazda](https://img.shields.io/badge/Mazda-CC0000?style=for-the-badge&logo=mazda&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
 
